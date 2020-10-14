@@ -4,11 +4,16 @@ import lombok.Data;
 import java.util.UUID;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 
 @Data
+@Entity
+@NoArgsConstructor
 public class Container {
 
     @Id
