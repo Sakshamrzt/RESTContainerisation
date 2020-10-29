@@ -66,6 +66,7 @@ public class ContainerServiceImpl implements ContainerService {
 
         if( deleteDTO.getInfraType()==0 )//docker
         {
+            dockerUtil.stopContainer(deleteDTO.getHostIp(),deleteDTO.getHostPort());
             dockerUtil.deleteContainer(deleteDTO.getHostIp(),deleteDTO.getHostPort());
         }
         else //kubernetes

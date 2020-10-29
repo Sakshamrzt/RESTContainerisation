@@ -67,6 +67,7 @@ public class CommonUtils {
 
         if(platform == 1  )
         {
+            System.out.println("Name is" + name);
             final String pattern = "[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*";
             final String stringToCheck=name;
             final Pattern patternRegex = Pattern.compile(pattern);

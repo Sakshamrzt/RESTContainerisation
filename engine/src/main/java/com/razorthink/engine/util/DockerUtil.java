@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -43,12 +44,12 @@ public class DockerUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(DockerUtil.class);
 
-    public void addContainer( DockerCreateParameter parameter,String ipHost,String port) throws BadRequestException
+    public void addContainer( DockerCreateParameter parameter,String ipHost,String port)
     {
         int code=0;
         try{
-            System.out.println(parameter.toString());
-            System.out.println("http://"+ipHost+":"+port+"/containers/create?name="+this.containerName);
+//            System.out.println(parameter.toString());
+//            System.out.println("http://"+ipHost+":"+port+"/containers/create?name="+this.containerName);
             URL url = new URL ("http://"+ipHost+":"+port+"/containers/create?name="+this.containerName);
             DockerUtilsHelper helper=new DockerUtilsHelper();
             HttpURLConnection connection = helper.createConnection(url,"POST");
@@ -58,6 +59,11 @@ public class DockerUtil {
             code = connection.getResponseCode();
             helper.readResponse(connection);
             logger.info("Container created successfully");
+        }
+        catch( ConnectException exception)
+        {
+            logger.error("Error connecting to docker port");
+            throw new BadRequestException("The docker tcp port is not up");
         }
         catch(IOException e)
         {
@@ -103,6 +109,11 @@ public class DockerUtil {
                 throw new IOException();
             logger.info("Container started successfully");
         }
+        catch( ConnectException exception)
+        {
+            logger.error("Error connecting to docker port");
+            throw new BadRequestException("The docker tcp port is not up");
+        }
         catch(IOException e)
         {
             logger.error("Exception: ",e);
@@ -140,6 +151,11 @@ public class DockerUtil {
                 throw new IOException();
             logger.info("Container updated successfully");
         }
+        catch( ConnectException exception)
+        {
+            logger.error("Error connecting to docker port");
+            throw new BadRequestException("The docker tcp port is not up");
+        }
         catch(IOException e)
         {
             logger.error("Exception: ",e);
@@ -164,6 +180,11 @@ public class DockerUtil {
             if(code==304)
                 throw new IOException();
             logger.info("Container stopped successfully");
+        }
+        catch( ConnectException exception)
+        {
+            logger.error("Error connecting to docker port");
+            throw new BadRequestException("The docker tcp port is not up");
         }
         catch(IOException e)
         {
@@ -194,6 +215,11 @@ public class DockerUtil {
             helper.readResponse(connection);
             logger.info("Container deleted successfully");
         }
+        catch( ConnectException exception)
+        {
+            logger.error("Error connecting to docker port");
+            throw new BadRequestException("The docker tcp port is not up");
+        }
         catch(IOException e)
         {
             logger.error("Exception :",e);
@@ -201,6 +227,10 @@ public class DockerUtil {
             {
                 logger.error("Container with name: {} does not exists",this.containerName);
                 throw new BadRequestException("Container with name: "+this.containerName+"does not exists");
+            }
+            if(code == 409)
+            {
+                throw new BadRequestException("Container name conflict");
             }
 
         }
@@ -229,7 +259,9 @@ public class DockerUtil {
         }
         catch(HttpHostConnectException e)
         {
-            logger.error("Docker TCP socket is not set");
+
+                logger.error("Error connecting to docker port");
+                throw new BadRequestException("The docker tcp port is not up");
         }
         catch(IOException e)
         {
@@ -254,12 +286,15 @@ class DockerUtilsHelper {
 
     public HttpURLConnection createConnection(URL url, String requestMethod) throws IOException
     {
-        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod(requestMethod);
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("Accept", "application/json");
         connection.setDoOutput(true);
         return connection;
+
+
     }
     /**
      * Makes Request
