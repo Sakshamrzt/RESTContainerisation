@@ -305,22 +305,16 @@ public class KubernetesUtil {
         return deploymentSpec;
     }
 
-    public int getPods()
+    public V1PodList getPods()
     {
         CoreV1Api apiCore = new CoreV1Api();
         int size = 0;
+        V1PodList v1PodList=null;
         try
         {
-            V1PodList podsList = apiCore.listNamespacedPod(DEFAULT_NAME_SPACE, null, null, null, null, null, null, null,
+            v1PodList = apiCore.listNamespacedPod(DEFAULT_NAME_SPACE, null, null, null, null, null, null, null,
                     null, null);
-            List<String> names = new ArrayList<>();
-            for( V1Pod item : podsList.getItems() )
-            {
 
-                if( item.getMetadata() != null )
-                    names.add(item.getMetadata().getName());
-            }
-            size = podsList.getItems().size();
         }
         catch( ApiException exception )
         {
@@ -330,7 +324,7 @@ public class KubernetesUtil {
         {
             log.error("Null Exception occurred while getting pods :   ", exception);
         }
-        return size;
+        return v1PodList;
     }
     public String getPodIPUsingDeployment(String deploymentName)
     {
